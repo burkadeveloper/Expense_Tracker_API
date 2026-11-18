@@ -57,15 +57,29 @@ export async function revokeOne(rawToken) {
 }
 
 export function setRefreshCookie(res, raw) {
+  const isProduction = 
+    env.NODE_ENV === "production" || 
+    env.COOKIE_SECURE === "true" || 
+    env.COOKIE_SECURE === true;
+
   res.cookie("rt", raw, {
     httpOnly: true,
-    secure: env.COOKIE_SECURE,
-    sameSite: "lax",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     maxAge: env.REFRESH_TOKEN_TTL_DAYS * 86400000,
     path: "/",
   });
 }
 
 export function clearRefreshCookie(res) {
-  res.clearCookie("rt", { path: "/" });
+  const isProduction = 
+    env.NODE_ENV === "production" || 
+    env.COOKIE_SECURE === "true" || 
+    env.COOKIE_SECURE === true;
+
+  res.clearCookie("rt", { 
+    path: "/",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+  });
 }
